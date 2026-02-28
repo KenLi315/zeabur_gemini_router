@@ -5,7 +5,24 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const ROUTER_API_KEY = process.env.ROUTER_API_KEY;
+
+// Protect all public endpoints except health check
+app.use((req, res, next) => {
+  if (req.path === "/health") return next();
+
+  if (!ROUTER_API_KEY) {
+    return res.status(500).json({ error: "Missing ROUTER_API_KEY on server" });
+  }
+
+  const clientKey = req.header("X-API-KEY");
+  if (!clientKey || clientKey !== ROUTER_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  next();
+});
 
 app.get("/health", (_, res) => {
   res.json({ ok: true });
