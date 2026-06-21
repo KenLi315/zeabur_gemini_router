@@ -4,12 +4,15 @@ const app = express();
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, content-type, Authorization, X-API-KEY");
+  // 🌟 這裡增加了對所有 x-stainless 私有標頭以及萬用標頭的徹底放行
+  res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, content-type, Authorization, X-API-KEY, x-stainless-os, x-stainless-lang, x-stainless-arch, x-stainless-package-version, x-stainless-runtime, x-stainless-runtime-version");
+  
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
   next();
 });
+
 
 app.use(express.json({ limit: "20mb" }));
 
