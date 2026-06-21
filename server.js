@@ -283,8 +283,9 @@ app.post("/v1/chat/completions", async (req, res) => {
       );
     }
 
-    const model = req.body?.model || GEMINI_MODEL;
-    const messages = req.body?.messages;
+    const { model: clientModel, messages: clientMessages } = req.body || {};
+    const model = clientModel || GEMINI_MODEL;
+    const messages = clientMessages;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return sendOpenAIError(
