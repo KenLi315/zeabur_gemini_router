@@ -394,18 +394,19 @@ app.post("/v1/chat/completions", async (req, res) => {
     const completionId = `chatcmpl-${Date.now()}`;
 
     res.json({
-      id: completionId,
+      id: `chatcmpl-${Date.now()}`,
       object: "chat.completion",
-      created,
+      created: Math.floor(Date.now() / 1000),
       model: req.body?.model || "gemini-2.5-flash-lite",
       choices: [
         {
           index: 0,
           message: {
             role: "assistant",
-            content: messageContent
+            // 🌟 核心修正：還原為插件要求的標準格式
+            content: messageContent || "" 
           },
-          finish_reason: finishReason
+          finish_reason: "stop"
         }
       ],
       usage: {
@@ -413,17 +414,19 @@ app.post("/v1/chat/completions", async (req, res) => {
         completion_tokens: usage?.candidatesTokenCount || 0,
         total_tokens: usage?.totalTokenCount || 0
       },
-      text: messageContent,
-      // 🌟 精準補上這兩行！宣告歷史對話物件已存在，安撫 BMO 插件的前端：
+      // 🌟 雙重保險補全：同時提供多種歷史與文字變數，讓 TG 插件跟 BMO 插件同時都能相容！
+      text: messageContent || "",
+      content: messageContent || "",
       messages: [
         { role: "user", content: req.body?.messages?.[0]?.content || "Hello" },
-        { role: "assistant", content: messageContent }
+        { role: "assistant", content: messageContent || "" }
       ],
       history: [
         { role: "user", content: req.body?.messages?.[0]?.content || "Hello" },
-        { role: "assistant", content: messageContent }
+        { role: "assistant", content: messageContent || "" }
       ]
     });
+
 
   } catch (e) {
     sendOpenAIError(res, 500, e.message || "Internal server error", "server_error", "internal_error");
