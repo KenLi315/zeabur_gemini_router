@@ -393,7 +393,6 @@ app.post("/v1/chat/completions", async (req, res) => {
     const created = Math.floor(Date.now() / 1000);
     const completionId = `chatcmpl-${Date.now()}`;
 
-        // 🌟 終極大結局破關：加上完美的 choices 陣列包裝，徹底消滅 reading 'message' 錯誤！
     res.json({
       id: completionId || `chatcmpl-${Date.now()}`,
       object: "chat.completion",
@@ -415,7 +414,7 @@ app.post("/v1/chat/completions", async (req, res) => {
         completion_tokens: usage?.candidatesTokenCount || 0,
         total_tokens: usage?.totalTokenCount || 0
       },
-      // 雙重保險補全：同時保留原本的欄位，讓你的其他測試也能完美相容
+      // 雙重保險補全：同時保留原本的扁平欄位，讓你的其他測試也能完美相容
       text: messageContent || "",
       content: messageContent || "",
       textOnly: messageContent || "",
@@ -428,8 +427,6 @@ app.post("/v1/chat/completions", async (req, res) => {
         { role: "assistant", content: messageContent || "" }
       ]
     });
-
-
 
   } catch (e) {
     sendOpenAIError(res, 500, e.message || "Internal server error", "server_error", "internal_error");
