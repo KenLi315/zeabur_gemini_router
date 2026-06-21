@@ -283,21 +283,25 @@ app.post("/v1/chat/completions", async (req, res) => {
       );
     }
 
-    // 🌟 你剛剛替換進去的終極防禦代碼區塊
-    const { model: clientModel, messages: clientMessages, prompt: clientPrompt } = req.body || {};
-    const model = clientModel || GEMINI_MODEL;
+    // 🌟 終極萬用洗滌網：徹底摧毀 BMO REST API 函數夾帶的所有進階雜質參數！
+    const { messages: clientMessages } = req.body || {};
+    
+    // 強制將模型名稱鎖死為健康的真實 Google 模型，拒絕接收前端傳過來的任何 OpenAI 變形名稱
+    const model = GEMINI_MODEL; 
+    
     let messages = [];
+
+    // 多重防禦補全
     if (Array.isArray(clientMessages) && clientMessages.length > 0) {
       messages = clientMessages;
-    } else if (typeof clientPrompt === "string" && clientPrompt) {
-      messages = [{ role: "user", content: clientPrompt }];
+    } else if (typeof req.body?.prompt === "string" && req.body.prompt) {
+      messages = [{ role: "user", content: req.body.prompt }];
     } else if (req.body?.content && typeof req.body.content === "string") {
       messages = [{ role: "user", content: req.body.content }];
-    } else if (typeof req.body === "string" && req.body) {
-      messages = [{ role: "user", content: req.body }];
     } else {
       messages = [{ role: "user", content: "Hello" }];
     }
+
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return sendOpenAIError(
