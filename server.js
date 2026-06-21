@@ -283,9 +283,19 @@ app.post("/v1/chat/completions", async (req, res) => {
       );
     }
 
-    const { model: clientModel, messages: clientMessages } = req.body || {};
+    const { model: clientModel, messages: clientMessages, prompt: clientPrompt } = req.body || {};
     const model = clientModel || GEMINI_MODEL;
-    const messages = clientMessages;
+    let messages = [];
+    if (Array.isArray(clientMessages) && clientMessages.length > 0) {
+      messages = clientMessages;
+    } else if (typeof clientPrompt === "string" && clientPrompt) {
+      messages = [{ role: "user", content: clientPrompt }];
+    } else if (req.body?.content && typeof req.body.content === "string") {
+      messages = [{ role: "user", content: req.body.content }];
+    } else {
+      messages = [{ role: "user", content: "Hello" }];
+    }
+
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return sendOpenAIError(
