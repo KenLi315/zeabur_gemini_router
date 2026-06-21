@@ -393,20 +393,21 @@ app.post("/v1/chat/completions", async (req, res) => {
     const created = Math.floor(Date.now() / 1000);
     const completionId = `chatcmpl-${Date.now()}`;
 
+        // 🌟 終極大結局破關：加上完美的 choices 陣列包裝，徹底消滅 reading 'message' 錯誤！
     res.json({
-      id: `chatcmpl-${Date.now()}`,
+      id: completionId || `chatcmpl-${Date.now()}`,
       object: "chat.completion",
-      created: Math.floor(Date.now() / 1000),
-      model: req.body?.model || "gemini-2.5-flash-lite",
+      created: created || Math.floor(Date.now() / 1000),
+      model: model || "gemini-2.5-flash-lite",
+      // 🌟 核心修正：加入標準的 choices 陣列，讓 Text Generator 插件能一秒解構並吐字
       choices: [
         {
           index: 0,
           message: {
             role: "assistant",
-            // 🌟 核心修正：還原為插件要求的標準格式
-            content: messageContent || "" 
+            content: messageContent || ""
           },
-          finish_reason: "stop"
+          finish_reason: finishReason || "stop"
         }
       ],
       usage: {
@@ -414,9 +415,10 @@ app.post("/v1/chat/completions", async (req, res) => {
         completion_tokens: usage?.candidatesTokenCount || 0,
         total_tokens: usage?.totalTokenCount || 0
       },
-      // 🌟 雙重保險補全：同時提供多種歷史與文字變數，讓 TG 插件跟 BMO 插件同時都能相容！
+      // 雙重保險補全：同時保留原本的欄位，讓你的其他測試也能完美相容
       text: messageContent || "",
       content: messageContent || "",
+      textOnly: messageContent || "",
       messages: [
         { role: "user", content: req.body?.messages?.[0]?.content || "Hello" },
         { role: "assistant", content: messageContent || "" }
@@ -426,6 +428,7 @@ app.post("/v1/chat/completions", async (req, res) => {
         { role: "assistant", content: messageContent || "" }
       ]
     });
+
 
 
   } catch (e) {
