@@ -397,7 +397,7 @@ app.post("/v1/chat/completions", async (req, res) => {
       id: completionId,
       object: "chat.completion",
       created,
-      model,
+      model: req.body?.model || "gemini-2.5-flash-lite",
       choices: [
         {
           index: 0,
@@ -409,12 +409,22 @@ app.post("/v1/chat/completions", async (req, res) => {
         }
       ],
       usage: {
-        prompt_tokens: usage.promptTokenCount || 0,
-        completion_tokens: usage.candidatesTokenCount || 0,
-        total_tokens: usage.totalTokenCount || 0
+        prompt_tokens: usage?.promptTokenCount || 0,
+        completion_tokens: usage?.candidatesTokenCount || 0,
+        total_tokens: usage?.totalTokenCount || 0
       },
-      text: textOnly
+      text: messageContent,
+      // 🌟 精準補上這兩行！宣告歷史對話物件已存在，安撫 BMO 插件的前端：
+      messages: [
+        { role: "user", content: req.body?.messages?.[0]?.content || "Hello" },
+        { role: "assistant", content: messageContent }
+      ],
+      history: [
+        { role: "user", content: req.body?.messages?.[0]?.content || "Hello" },
+        { role: "assistant", content: messageContent }
+      ]
     });
+
   } catch (e) {
     sendOpenAIError(res, 500, e.message || "Internal server error", "server_error", "internal_error");
   }
